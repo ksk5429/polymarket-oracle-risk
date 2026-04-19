@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "polymarket-oracle-risk"
+abstract: "Bayesian-logistic risk analyzer for Polymarket oracle (UMA OO) resolutions."
+authors:
+  - family-names: "Kim"
+    given-names: "Kyeong Sun"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: register
+license: MIT
+repository-code: "https://github.com/ksk5429/polymarket-oracle-risk"
+version: "0.1.0"
+date-released: "2026-05-15"
+keywords:
+  - prediction-markets
+  - polymarket
+  - uma
+  - oracle
+  - risk-analysis
+  - bayesian
+preferred-citation:
+  type: software
+  title: "polymarket-oracle-risk: Bayesian risk analyzer for Polymarket"
+  authors:
+    - family-names: "Kim"
+      given-names: "Kyeong Sun"
+  year: 2026
+  url: "https://github.com/ksk5429/polymarket-oracle-risk"
