@@ -1,5 +1,17 @@
 name: Release
 
+# All third-party actions on the publishing path are pinned by commit SHA so a
+# compromised upstream tag cannot impersonate our Trusted Publisher identity
+# on PyPI. Update SHAs via Renovate (see renovate.json).
+#
+#   pypa/gh-action-pypi-publish v1.14.0       → 6733eb7d741f0b11ec6a39b58540dab7590f9b7d
+#   googleapis/release-please-action v4       → 8b8fd2cc23b2e18957157a9d923d75aa0c6f6ad5
+#   actions/checkout v4                        → 34e114876b0b11c390a56381ad16ebd13914f8d5
+#   actions/upload-artifact v4                 → ea165f8d65b6e75b540449e92b4886f43607fa02
+#   actions/download-artifact v4               → d3f86a106a0bac45b974a628896c90dbdf5c8093
+#   actions/attest-build-provenance v4         → b3e506e8c389afc651c5bacf2b8f2a1ea0557215
+#   astral-sh/setup-uv v6                      → e4db8464a088ece1b920f60402e813ea4de65b8f
+
 on:
   push:
     branches: [main]
@@ -23,7 +35,7 @@ jobs:
       release_created: ${{ steps.rp.outputs.release_created }}
       tag_name:        ${{ steps.rp.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@8b8fd2cc23b2e18957157a9d923d75aa0c6f6ad5  # v4
         id: rp
         with:
           release-type: python
@@ -36,19 +48,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
           persist-credentials: false
           ref: ${{ needs.release-please.outputs.tag_name }}
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@e4db8464a088ece1b920f60402e813ea4de65b8f  # v6
         with:
           version: "0.5.x"
           enable-cache: true
           python-version: "3.12"
       - run: uv build --sdist --wheel --out-dir dist
       - run: uv run --with twine twine check --strict dist/*
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: python-package-distributions
           path: dist/
@@ -64,11 +76,11 @@ jobs:
       contents: read
       attestations: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
         with:
           name: python-package-distributions
           path: dist
-      - uses: actions/attest-build-provenance@v4
+      - uses: actions/attest-build-provenance@b3e506e8c389afc651c5bacf2b8f2a1ea0557215  # v4
         with:
           subject-path: "dist/*"
 
@@ -83,11 +95,13 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
         with:
           name: python-package-distributions
           path: dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      # Critical supply-chain gate: this action holds the Trusted Publisher
+      # identity. Pin by SHA, never by mutable tag.
+      - uses: pypa/gh-action-pypi-publish@6733eb7d741f0b11ec6a39b58540dab7590f9b7d  # v1.14.0
         with:
           attestations: true
           print-hash: true
@@ -100,14 +114,17 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
           persist-credentials: false
           ref: ${{ needs.release-please.outputs.tag_name }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
         with:
           name: python-package-distributions
           path: dist
+      # SBOM action is on the release artifact path, not the signing path;
+      # version tag is acceptable here since its only write surface is
+      # attaching assets to an existing release.
       - uses: anchore/sbom-action@v0
         with:
           path: .
